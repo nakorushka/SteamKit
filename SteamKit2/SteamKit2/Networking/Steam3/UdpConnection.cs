@@ -11,8 +11,6 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using Org.Mentalis.Network;
-using Org.Mentalis.Network.ProxySocket;
 using SteamKit2.Internal;
 
 namespace SteamKit2
@@ -92,27 +90,15 @@ namespace SteamKit2
         private Dictionary<uint, UdpPacket> inPackets;
 
         private ILogContext log;
-        private ProxySocket socket;
-        public UdpConnection( ILogContext log, Proxy? proxy = null )
+
+        public UdpConnection(ILogContext log)
         {
             this.log = log ?? throw new ArgumentNullException( nameof( log ) );
 
-            socket = new ProxySocket( AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp );
-            if ( proxy != null )
-            {
-                socket.ProxyEndPoint = new IPEndPoint( IPAddress.Parse( proxy!.Host ), proxy!.Port );
-                socket.ProxyType = ProxyTypes.Https;
-                if ( !string.IsNullOrWhiteSpace( proxy!.UserName ) && !string.IsNullOrWhiteSpace( proxy!.Password ) )
-                {
-                    socket.ProxyUser = proxy!.UserName;
-                    socket.ProxyPass = proxy!.Password;
-                }
-            }
-            else
-            {
-                IPEndPoint localEP = new IPEndPoint( IPAddress.Any, 0 );
-                socket.Bind( localEP );
-            }
+            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, 0);
+
+            sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, System.Net.Sockets.ProtocolType.Udp);
+            sock.Bind(localEndPoint);
 
             state = (int)State.Disconnected;
 
@@ -135,7 +121,7 @@ namespace SteamKit2
         /// </summary>
         /// <param name="endPoint">The endPoint to connect to</param>
         /// <param name="timeout">Timeout in milliseconds</param>
-        public void Connect(EndPoint endPoint, Proxy? proxy, int timeout)
+        public void Connect(EndPoint endPoint, int timeout)
         {
             outPackets.Clear();
             inPackets.Clear();
