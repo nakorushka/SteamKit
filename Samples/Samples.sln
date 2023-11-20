@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SteamKit2", "..\SteamKit2\S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample1c_WebCookie", "1c.WebCookie\Sample1c_WebCookie.csproj", "{0C14B96E-A299-4047-81A9-8E272A573292}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample0_LogonWithProxy", "Sample0_LogonWithProxy\Sample0_LogonWithProxy.csproj", "{CC38A56E-EB0C-4251-906F-17073BDF9ED4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample0_LogonWithProxy", "0.LogonWithProxy\Sample0_LogonWithProxy.csproj", "{CC38A56E-EB0C-4251-906F-17073BDF9ED4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
