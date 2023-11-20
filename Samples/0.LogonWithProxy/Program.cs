@@ -43,11 +43,26 @@ while ( isRunning )
     manager.RunWaitCallbacks( TimeSpan.FromSeconds( 1 ) );
 }
 
+async void OnConnected( SteamClient.ConnectedCallback callback )
+{
+
+}
+
 void OnDisconnected( SteamClient.DisconnectedCallback callback )
 {
     Console.WriteLine( "Disconnected from Steam" );
 
     isRunning = false;
+}
+
+async void OnLoggedOn( SteamUser.LoggedOnCallback callback )
+{
+
+}
+
+void OnLoggedOff( SteamUser.LoggedOffCallback callback )
+{
+    Console.WriteLine( "Logged off of Steam: {0}", callback.Result );
 }
 
 LogonData ReadLogonData()
