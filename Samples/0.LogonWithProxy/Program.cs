@@ -1,60 +1,58 @@
-﻿using Newtonsoft.Json;
+﻿using Sample0_LogonWithProxy;
+using Newtonsoft.Json;
 using SteamKit2;
 
-namespace Sample0_LogonWithProxy
+const string LogonDataPath = "logon_data.json";
+
+var logonData = ReadLogonData();
+
+if ( string.IsNullOrEmpty( logonData.Username ) || string.IsNullOrEmpty( logonData.Password ) )
 {
-    public class Program
-    {
-        private const string LogonDataPath = "logon_data.json";
+    Console.Error.WriteLine( "Username or password is empty!" );
+    return;
+}
 
-        static void Main( string[] args )
-        {
-            var logonData = ReadLogonData();
-            string previouslyStoredGuardData = null;
+// create our steamclient instance
+var steamClient = new SteamClient();
+// create the callback manager which will route callbacks to function calls
+var manager = new CallbackManager( steamClient );
 
-            if ( string.IsNullOrEmpty( logonData.Username ) || string.IsNullOrEmpty( logonData.Password ) )
-            {
-                Console.Error.WriteLine( "Username or password is empty!" );
-                return;
-            }
+// get the steamuser handler, which is used for logging on after successfully connecting
+var steamUser = steamClient.GetHandler<SteamUser>();
 
-            // create our steamclient instance
-            var steamClient = new SteamClient();
-            // create the callback manager which will route callbacks to function calls
-            var manager = new CallbackManager( steamClient );
+// register a few callbacks we're interested in
+// these are registered upon creation to a callback manager, which will then route the callbacks
+// to the functions specified
+manager.Subscribe<SteamClient.ConnectedCallback>( OnConnected );
+manager.Subscribe<SteamClient.DisconnectedCallback>( OnDisconnected );
 
-            // get the steamuser handler, which is used for logging on after successfully connecting
-            var steamUser = steamClient.GetHandler<SteamUser>();
+manager.Subscribe<SteamUser.LoggedOnCallback>( OnLoggedOn );
+manager.Subscribe<SteamUser.LoggedOffCallback>( OnLoggedOff );
 
-            // register a few callbacks we're interested in
-            // these are registered upon creation to a callback manager, which will then route the callbacks
-            // to the functions specified
-            manager.Subscribe<SteamClient.ConnectedCallback>( OnConnected );
-            manager.Subscribe<SteamClient.DisconnectedCallback>( OnDisconnected );
+var isRunning = true;
 
-            manager.Subscribe<SteamUser.LoggedOnCallback>( OnLoggedOn );
-            manager.Subscribe<SteamUser.LoggedOffCallback>( OnLoggedOff );
+Console.WriteLine( "Connecting to Steam..." );
 
-            var isRunning = true;
+// initiate the connection
+steamClient.Connect();
 
-            Console.WriteLine( "Connecting to Steam..." );
+// create our callback handling loop
+while ( isRunning )
+{
+    // in order for the callbacks to get routed, they need to be handled by the manager
+    manager.RunWaitCallbacks( TimeSpan.FromSeconds( 1 ) );
+}
 
-            // initiate the connection
-            steamClient.Connect();
+void OnDisconnected( SteamClient.DisconnectedCallback callback )
+{
+    Console.WriteLine( "Disconnected from Steam" );
 
-            // create our callback handling loop
-            while ( isRunning )
-            {
-                // in order for the callbacks to get routed, they need to be handled by the manager
-                manager.RunWaitCallbacks( TimeSpan.FromSeconds( 1 ) );
-            }
-        }
+    isRunning = false;
+}
 
-        private static LogonData ReadLogonData()
-        {
-            using StreamReader reader = new( LogonDataPath );
-            var json = reader.ReadToEnd();
-            return JsonConvert.DeserializeObject<LogonData>( json );
-        }
-    }
+LogonData ReadLogonData()
+{
+    using StreamReader reader = new( LogonDataPath );
+    var json = reader.ReadToEnd();
+    return JsonConvert.DeserializeObject<LogonData>( json );
 }
