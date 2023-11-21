@@ -3,6 +3,7 @@ using SteamKit2;
 
 var logonData = DataReader.ReadLogonData();
 var proxyData = DataReader.ReadProxyData();
+var steamGuardAccount = DataReader.ReadSteamGuardAccount();
 
 if ( string.IsNullOrEmpty( logonData.Username ) || string.IsNullOrEmpty( logonData.Password ) )
 {
@@ -52,6 +53,7 @@ void OnConnected( SteamClient.ConnectedCallback callback )
     {
         Username = logonData.Username,
         Password = logonData.Password,
+        TwoFactorCode = steamGuardAccount.GenerateSteamGuardCode()
     } );
 }
 
