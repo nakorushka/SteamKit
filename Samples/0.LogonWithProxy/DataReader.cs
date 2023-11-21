@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SteamAuth;
 
 namespace Sample0_LogonWithProxy
 {
@@ -6,6 +7,7 @@ namespace Sample0_LogonWithProxy
     {
         const string LogonDataPath = "logon_data.json";
         const string ProxyDataPath = "proxy_data.json";
+        const string SteamGuardAccountPath = "steam_guard_account.maFile";
 
         public static LogonData ReadLogonData()
         {
@@ -19,6 +21,13 @@ namespace Sample0_LogonWithProxy
             using StreamReader reader = new( ProxyDataPath );
             var json = reader.ReadToEnd();
             return JsonConvert.DeserializeObject<ProxyData>( json );
+        }
+
+        public static SteamGuardAccount ReadSteamGuardAccount()
+        {
+            using StreamReader reader = new( SteamGuardAccountPath );
+            var json = reader.ReadToEnd();
+            return JsonConvert.DeserializeObject<SteamGuardAccount>( json );
         }
     }
 }
