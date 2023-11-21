@@ -12,9 +12,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="logon_data.json" />
+    <None Remove="proxy_data.json" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="logon_data.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="proxy_data.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
