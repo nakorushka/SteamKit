@@ -43,6 +43,8 @@ while ( isRunning )
     manager.RunWaitCallbacks( TimeSpan.FromSeconds( 1 ) );
 }
 
+Console.ReadKey();
+
 void OnConnected( SteamClient.ConnectedCallback callback )
 {
     Console.WriteLine( "Connected to Steam! Logging in '{0}'...", logonData.Username );
