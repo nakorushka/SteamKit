@@ -13,12 +13,16 @@
   <ItemGroup>
     <None Remove="logon_data.json" />
     <None Remove="proxy_data.json" />
+    <None Remove="steam_guard_account.maFile" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="logon_data.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="proxy_data.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="steam_guard_account.maFile">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
