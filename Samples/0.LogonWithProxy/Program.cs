@@ -43,9 +43,15 @@ while ( isRunning )
     manager.RunWaitCallbacks( TimeSpan.FromSeconds( 1 ) );
 }
 
-async void OnConnected( SteamClient.ConnectedCallback callback )
+void OnConnected( SteamClient.ConnectedCallback callback )
 {
+    Console.WriteLine( "Connected to Steam! Logging in '{0}'...", logonData.Username );
 
+    steamUser.LogOn( new SteamUser.LogOnDetails
+    {
+        Username = logonData.Username,
+        Password = logonData.Password,
+    } );
 }
 
 void OnDisconnected( SteamClient.DisconnectedCallback callback )
@@ -55,9 +61,34 @@ void OnDisconnected( SteamClient.DisconnectedCallback callback )
     isRunning = false;
 }
 
-async void OnLoggedOn( SteamUser.LoggedOnCallback callback )
+void OnLoggedOn( SteamUser.LoggedOnCallback callback )
 {
+    if ( callback.Result != EResult.OK )
+    {
+        if ( callback.Result == EResult.AccountLogonDenied )
+        {
+            // if we recieve AccountLogonDenied or one of it's flavors (AccountLogonDeniedNoMailSent, etc)
+            // then the account we're logging into is SteamGuard protected
+            // see sample 5 for how SteamGuard can be handled
 
+            Console.WriteLine( "Unable to logon to Steam: This account is SteamGuard protected." );
+
+            isRunning = false;
+            return;
+        }
+
+        Console.WriteLine( "Unable to logon to Steam: {0} / {1}", callback.Result, callback.ExtendedResult );
+
+        isRunning = false;
+        return;
+    }
+
+    Console.WriteLine( "Successfully logged on!" );
+
+    // at this point, we'd be able to perform actions on Steam
+
+    // for this sample we'll just log off
+    steamUser.LogOff();
 }
 
 void OnLoggedOff( SteamUser.LoggedOffCallback callback )
