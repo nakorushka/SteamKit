@@ -1,10 +1,8 @@
 ﻿using Sample0_LogonWithProxy;
-using Newtonsoft.Json;
 using SteamKit2;
 
-const string LogonDataPath = "logon_data.json";
-
-var logonData = ReadLogonData();
+var logonData = DataReader.ReadLogonData();
+var proxyData = DataReader.ReadProxyData();
 
 if ( string.IsNullOrEmpty( logonData.Username ) || string.IsNullOrEmpty( logonData.Password ) )
 {
@@ -34,7 +32,8 @@ var isRunning = true;
 Console.WriteLine( "Connecting to Steam..." );
 
 // initiate the connection
-steamClient.Connect();
+var proxy = Proxy.Get( proxyData );
+steamClient.Connect( proxy: proxy );
 
 // create our callback handling loop
 while ( isRunning )
@@ -96,11 +95,4 @@ void OnLoggedOn( SteamUser.LoggedOnCallback callback )
 void OnLoggedOff( SteamUser.LoggedOffCallback callback )
 {
     Console.WriteLine( "Logged off of Steam: {0}", callback.Result );
-}
-
-LogonData ReadLogonData()
-{
-    using StreamReader reader = new( LogonDataPath );
-    var json = reader.ReadToEnd();
-    return JsonConvert.DeserializeObject<LogonData>( json );
 }
