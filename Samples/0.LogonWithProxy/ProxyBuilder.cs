@@ -2,9 +2,9 @@
 
 namespace Sample0_LogonWithProxy
 {
-    public static class Proxy
+    public static class ProxyBuilder
     {
-        public static IWebProxy Get( ProxyData proxyData )
+        public static IWebProxy Build( ProxyData proxyData )
         {
             return new WebProxy( proxyData.Address, proxyData.Port )
             {
