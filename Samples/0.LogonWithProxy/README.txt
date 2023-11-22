@@ -32,3 +32,8 @@ proxy_data.json
 }
 
 - 3 -
+
+MaFile - файл с данными от Steam аккаунта для эмуляции мобильного 2FA.
+
+Название:
+steam_guard_account.maFile
