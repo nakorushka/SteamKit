@@ -13,13 +13,18 @@ namespace SteamKit2
     {
         internal class WebSocketContext : IDisposable
         {
-            public WebSocketContext(WebSocketConnection connection, EndPoint endPoint)
+            public WebSocketContext(WebSocketConnection connection, EndPoint endPoint, IWebProxy proxy = null)
             {
                 this.connection = connection ?? throw new ArgumentNullException( nameof( connection ) );
                 EndPoint = endPoint ?? throw new ArgumentNullException( nameof( endPoint ) );
 
                 cts = new CancellationTokenSource();
                 socket = new ClientWebSocket();
+                if ( proxy != null )
+                {
+                    socket.Options.Proxy = proxy;
+                }
+
                 connectionUri = ConstructUri(endPoint);
             }
 
