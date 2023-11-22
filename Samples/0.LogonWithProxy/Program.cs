@@ -94,10 +94,10 @@ void OnLoggedOn( SteamUser.LoggedOnCallback callback )
     Console.WriteLine( "- Steam login via IP: " + callback.PublicIP );
     if ( proxyData.Address == callback.PublicIP.ToString() )
     {
-        Console.WriteLine( "- Success: Login via IP" );
+        Console.WriteLine( "- SUCCESS: Login via IP" );
     } else
     {
-        Console.WriteLine( "- Error: Cannot login via IP" );
+        Console.WriteLine( "- ERROR: Cannot login via IP" );
     }
 
     // at this point, we'd be able to perform actions on Steam
