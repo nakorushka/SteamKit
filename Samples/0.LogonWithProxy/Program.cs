@@ -33,7 +33,7 @@ var isRunning = true;
 Console.WriteLine( "Connecting to Steam..." );
 
 // initiate the connection
-var proxy = ProxyBuilder.Build( proxyData );
+var proxy = WebProxyBuilder.Build( proxyData );
 steamClient.Connect( proxy: proxy );
 
 // create our callback handling loop

@@ -2,7 +2,7 @@
 
 namespace Sample0_LogonWithProxy
 {
-    public static class ProxyBuilder
+    public static class WebProxyBuilder
     {
         public static WebProxy Build( ProxyData proxyData )
         {
