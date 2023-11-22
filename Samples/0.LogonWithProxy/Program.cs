@@ -17,8 +17,10 @@ if ( string.IsNullOrEmpty( proxyData.Address ) || proxyData.Port == 0 || string.
     return;
 }
 
+// create our steamConfiguration instance with WebSocket protocol
+var steamConfiguration = SteamConfiguration.Create( ( x ) => x.WithProtocolTypes( ProtocolTypes.WebSocket ) );
 // create our steamclient instance
-var steamClient = new SteamClient();
+var steamClient = new SteamClient( steamConfiguration );
 // create the callback manager which will route callbacks to function calls
 var manager = new CallbackManager( steamClient );
 
