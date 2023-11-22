@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\SteamKit2\SteamKit2\SteamKit2.csproj" />
+    <ProjectReference Include="..\SteamAuthCore\SteamAuthCore.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="logon_data.json" />

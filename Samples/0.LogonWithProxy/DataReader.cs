@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using SteamAuth;
+using SteamAuthCore;
 
 namespace Sample0_LogonWithProxy
 {
