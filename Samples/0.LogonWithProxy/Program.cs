@@ -7,7 +7,13 @@ var steamGuardAccount = DataReader.ReadSteamGuardAccount();
 
 if ( string.IsNullOrEmpty( logonData.Username ) || string.IsNullOrEmpty( logonData.Password ) )
 {
-    Console.Error.WriteLine( "Username or password is empty!" );
+    Console.Error.WriteLine( "LogonData: Username or Password is empty!" );
+    return;
+}
+
+if ( string.IsNullOrEmpty( proxyData.Address ) || proxyData.Port == 0 || string.IsNullOrEmpty( proxyData.Username ) || string.IsNullOrEmpty( proxyData.Password ) )
+{
+    Console.Error.WriteLine( "ProxyData: Address or Port or Username or Password is empty!" );
     return;
 }
 
