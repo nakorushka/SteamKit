@@ -95,7 +95,8 @@ void OnLoggedOn( SteamUser.LoggedOnCallback callback )
     if ( proxyData.Address == callback.PublicIP.ToString() )
     {
         Console.WriteLine( "- SUCCESS: Login via IP" );
-    } else
+    }
+    else
     {
         Console.WriteLine( "- ERROR: Cannot login via IP" );
     }
