@@ -5,6 +5,7 @@
 
 
 using System;
+using System.Net;
 using System.Net.Http;
 using SteamKit2.Discovery;
 
@@ -110,6 +111,11 @@ namespace SteamKit2
         /// Keys can be obtained from https://steamcommunity.com/dev or the Steamworks Partner site.
         /// </summary>
         public string WebAPIKey => state.WebAPIKey;
+
+        /// <summary>
+        /// The proxy server used for WebSocket requests.
+        /// </summary>
+        public IWebProxy WebProxy => state.WebProxy;
 
         /// <summary>
         /// The server list used for this configuration.
