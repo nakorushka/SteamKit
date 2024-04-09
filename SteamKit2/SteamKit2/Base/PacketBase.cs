@@ -128,7 +128,10 @@ namespace SteamKit2
         /// <param name="data">The data.</param>
         public PacketClientMsgProtobuf( EMsg eMsg, byte[] data )
         {
-            ArgumentNullException.ThrowIfNull( data );
+            if ( data == null )
+            {
+                throw new ArgumentNullException( nameof(data) );
+            }
 
             MsgType = eMsg;
             payload = data;
@@ -212,7 +215,10 @@ namespace SteamKit2
         /// <param name="data">The data.</param>
         public PacketClientMsg( EMsg eMsg, byte[] data )
         {
-            ArgumentNullException.ThrowIfNull( data );
+            if ( data == null )
+            {
+                throw new ArgumentNullException( nameof(data) );
+            }
 
             MsgType = eMsg;
             payload = data;
@@ -296,7 +302,10 @@ namespace SteamKit2
         /// <param name="data">The data.</param>
         public PacketMsg( EMsg eMsg, byte[] data )
         {
-            ArgumentNullException.ThrowIfNull( data );
+            if ( data == null )
+            {
+                throw new ArgumentNullException( nameof(data) );
+            }
 
             MsgType = eMsg;
             payload = data;

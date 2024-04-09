@@ -112,7 +112,10 @@ namespace SteamKit2
 
         public Steam3Manifest(byte[] data)
         {
-            ArgumentNullException.ThrowIfNull( data );
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
 
             Deserialize(data);
         }
@@ -124,9 +127,11 @@ namespace SteamKit2
 
         void Deserialize(byte[] data)
         {
-            using var ms = new MemoryStream( data );
-            using var br = new BinaryReader( ms );
-            Deserialize( br );
+            using ( var ms = new MemoryStream( data ) )
+            using ( var br = new BinaryReader( ms ) )
+            {
+                Deserialize( br );
+            }
         }
 
         void Deserialize( BinaryReader ds )

@@ -120,10 +120,12 @@ namespace SteamKit2
 
                     if ( entry.details != null )
                     {
-                        using var stream = new MemoryStream( entry.details );
-                        while ( ( stream.Length - stream.Position ) >= sizeof( int ) )
+                        using ( var stream = new MemoryStream( entry.details ) )
                         {
-                            details.Add( stream.ReadInt32() );
+                            while ( ( stream.Length - stream.Position ) >= sizeof( int ) )
+                            {
+                                details.Add( stream.ReadInt32() );
+                            }
                         }
                     }
 

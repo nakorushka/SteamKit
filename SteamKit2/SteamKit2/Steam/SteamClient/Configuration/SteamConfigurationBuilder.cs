@@ -5,7 +5,6 @@
 
 
 using System;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using SteamKit2.Discovery;
@@ -42,16 +41,14 @@ namespace SteamKit2
 
                 Universe = EUniverse.Public,
 
-                WebAPIBaseAddress = WebAPI.DefaultBaseAddress,
-
-                WebProxy = null
+                WebAPIBaseAddress = WebAPI.DefaultBaseAddress
             };
         }
 
         SteamConfigurationState state;
 
         public SteamConfiguration Build()
-            => new(state);
+            => new SteamConfiguration(state);
 
         public ISteamConfigurationBuilder WithCellID(uint cellID)
         {
@@ -116,12 +113,6 @@ namespace SteamKit2
         public ISteamConfigurationBuilder WithWebAPIKey(string webApiKey)
         {
             state.WebAPIKey = webApiKey ?? throw new ArgumentNullException(nameof(webApiKey));
-            return this;
-        }
-
-        public ISteamConfigurationBuilder WithWebProxy( IWebProxy webProxy )
-        {
-            state.WebProxy = webProxy;
             return this;
         }
 

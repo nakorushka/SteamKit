@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Threading;
+using Org.Mentalis.Network.ProxySocket.Models;
 
 namespace SteamKit2
 {
@@ -24,11 +25,9 @@ namespace SteamKit2
         public EndPoint? CurrentEndPoint { get; set; }
         public ProtocolTypes ProtocolTypes => ProtocolTypes.WebSocket;
 
-        public void Connect( EndPoint endPoint, int timeout = 5000 ) => Connect( endPoint, null, timeout );
-
-        public void Connect( EndPoint endPoint, IWebProxy proxy, int timeout = 5000 )
+        public void Connect(EndPoint endPoint, Proxy? proxy, int timeout = 5000)
         {
-            var newContext = new WebSocketContext(this, endPoint, proxy);
+            var newContext = new WebSocketContext(this, endPoint);
             var oldContext = Interlocked.Exchange(ref currentContext, newContext);
             if (oldContext != null)
             {

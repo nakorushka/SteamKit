@@ -2329,7 +2329,6 @@ namespace SteamKit2.GC.Dota.Internal
         BRACKET_DOUBLE_ALL_WINNER = 6,
         SHOWMATCH = 7,
         GSL = 8,
-        PLACEMENT = 9,
     }
 
     [global::ProtoBuf.ProtoContract()]

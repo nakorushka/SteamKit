@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using SteamKit2.Internal;
 
 namespace SteamKit2
@@ -119,8 +120,8 @@ namespace SteamKit2
         /// <returns>The Job ID of the request. This can be used to find the appropriate <see cref="PICSTokensCallback"/>.</returns>
         public AsyncJob<PICSTokensCallback> PICSGetAccessTokens( uint? app, uint? package )
         {
-            List<uint> apps = [];
-            List<uint> packages = [];
+            List<uint> apps = new List<uint>();
+            List<uint> packages = new List<uint>();
 
             if ( app.HasValue ) apps.Add( app.Value );
             if ( package.HasValue ) packages.Add( package.Value );
@@ -203,9 +204,15 @@ namespace SteamKit2
         /// <returns>The Job ID of the request. This can be used to find the appropriate <see cref="PICSProductInfoCallback"/>.</returns>
         public AsyncJobMultiple<PICSProductInfoCallback> PICSGetProductInfo( IEnumerable<PICSRequest> apps, IEnumerable<PICSRequest> packages, bool metaDataOnly = false )
         {
-            ArgumentNullException.ThrowIfNull( apps );
+            if ( apps == null )
+            {
+                throw new ArgumentNullException( nameof(apps) );
+            }
 
-            ArgumentNullException.ThrowIfNull( packages );
+            if ( packages == null )
+            {
+                throw new ArgumentNullException( nameof(packages) );
+            }
 
             var request = new ClientMsgProtobuf<CMsgClientPICSProductInfoRequest>( EMsg.ClientPICSProductInfoRequest );
             request.SourceJobID = Client.GetNextJobID();
@@ -280,7 +287,10 @@ namespace SteamKit2
         /// <returns>The Job ID of the request. This can be used to find the appropriate <see cref="FreeLicenseCallback"/>.</returns>
         public AsyncJob<FreeLicenseCallback> RequestFreeLicense( IEnumerable<uint> apps )
         {
-            ArgumentNullException.ThrowIfNull( apps );
+            if ( apps == null )
+            {
+                throw new ArgumentNullException( nameof(apps) );
+            }
 
             var request = new ClientMsgProtobuf<CMsgClientRequestFreeLicense>( EMsg.ClientRequestFreeLicense );
             request.SourceJobID = Client.GetNextJobID();
@@ -334,7 +344,10 @@ namespace SteamKit2
         /// <param name="packetMsg">The packet message that contains the data.</param>
         public override void HandleMsg( IPacketMsg packetMsg )
         {
-            ArgumentNullException.ThrowIfNull( packetMsg );
+            if ( packetMsg == null )
+            {
+                throw new ArgumentNullException( nameof(packetMsg) );
+            }
 
             if ( !dispatchMap.TryGetValue( packetMsg.MsgType, out var handlerFunc ) )
             {

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using SteamKit2.Internal;
 
 namespace SteamKit2.Authentication
@@ -25,12 +26,12 @@ namespace SteamKit2.Authentication
         /// <summary>
         /// Confirmation types that will be able to confirm the request.
         /// </summary>
-        List<CAuthentication_AllowedConfirmation> AllowedConfirmations;
+        public List<CAuthentication_AllowedConfirmation> AllowedConfirmations;
 
         /// <summary>
         /// Authenticator object which will be used to handle 2-factor authentication if necessary.
         /// </summary>
-        public IAuthenticator? Authenticator { get; }
+        private IAuthenticator? Authenticator { get; }
         /// <summary>
         /// Unique identifier of requestor, also used for routing, portion of QR code.
         /// </summary>
@@ -60,10 +61,11 @@ namespace SteamKit2.Authentication
         /// <returns>An object containing tokens which can be used to login to Steam.</returns>
         /// <exception cref="InvalidOperationException">Thrown when an invalid state occurs, such as no supported confirmation methods are available.</exception>
         /// <exception cref="AuthenticationException">Thrown when polling fails.</exception>
-        public async Task<AuthPollResult> PollingWaitForResultAsync( CancellationToken cancellationToken = default )
+        public async Task<AuthPollResult> PollingWaitForResultAsync( string code, CancellationToken cancellationToken = default )
         {
+            EResult eResult = EResult.BadResponse;
             var pollLoop = false;
-            var preferredConfirmation = AllowedConfirmations.FirstOrDefault();
+            var preferredConfirmation = AllowedConfirmations.FirstOrDefault( x => x.confirmation_type == EAuthSessionGuardType.k_EAuthSessionGuardType_DeviceCode || x.confirmation_type == EAuthSessionGuardType.k_EAuthSessionGuardType_EmailCode || x.confirmation_type == EAuthSessionGuardType.k_EAuthSessionGuardType_None );
 
             if ( preferredConfirmation == null || preferredConfirmation.confirmation_type == EAuthSessionGuardType.k_EAuthSessionGuardType_Unknown )
             {
@@ -91,68 +93,75 @@ namespace SteamKit2.Authentication
             {
                 // No steam guard
                 case EAuthSessionGuardType.k_EAuthSessionGuardType_None:
+                    eResult = EResult.OK;
                     break;
 
                 // 2-factor code from the authenticator app or sent to an email
                 case EAuthSessionGuardType.k_EAuthSessionGuardType_EmailCode:
                 case EAuthSessionGuardType.k_EAuthSessionGuardType_DeviceCode:
-                    if ( this is not CredentialsAuthSession credentialsAuthSession )
+                    if ( !( this is CredentialsAuthSession credentialsAuthSession ) )
                     {
                         throw new InvalidOperationException( $"Got {preferredConfirmation.confirmation_type} confirmation type in a session that is not {nameof( CredentialsAuthSession )}." );
                     }
 
-                    if ( Authenticator == null )
-                    {
-                        throw new InvalidOperationException( $"This account requires an authenticator for login, but none was provided in {nameof( AuthSessionDetails )}." );
-                    }
+                    //if ( Authenticator == null )
+                    //{
+                    //    throw new InvalidOperationException( $"This account requires an authenticator for login, but none was provided in {nameof( AuthSessionDetails )}." );
+                    //}
 
-                    var expectedInvalidCodeResult = preferredConfirmation.confirmation_type switch
-                    {
-                        EAuthSessionGuardType.k_EAuthSessionGuardType_EmailCode => EResult.InvalidLoginAuthCode,
-                        EAuthSessionGuardType.k_EAuthSessionGuardType_DeviceCode => EResult.TwoFactorCodeMismatch,
-                        _ => throw new NotImplementedException(),
-                    };
-                    var previousCodeWasIncorrect = false;
-                    var waitingForValidCode = true;
+                    //var expectedInvalidCodeResult = preferredConfirmation.confirmation_type switch
+                    //{
+                    //    EAuthSessionGuardType.k_EAuthSessionGuardType_EmailCode => EResult.InvalidLoginAuthCode,
+                    //    EAuthSessionGuardType.k_EAuthSessionGuardType_DeviceCode => EResult.TwoFactorCodeMismatch,
+                    //    _ => throw new NotImplementedException(),
+                    //};
+                    //var previousCodeWasIncorrect = false;
+                    //var waitingForValidCode = true;
 
-                    do
-                    {
-                        cancellationToken.ThrowIfCancellationRequested();
+                    //do
+                    //{
 
-                        try
+                    //cancellationToken.ThrowIfCancellationRequested();
+
+                    try
+                    {
+                        //var task = preferredConfirmation.confirmation_type switch
+                        //{
+                        //    EAuthSessionGuardType.k_EAuthSessionGuardType_EmailCode => Authenticator.GetEmailCodeAsync( preferredConfirmation.associated_message, previousCodeWasIncorrect ),
+                        //    EAuthSessionGuardType.k_EAuthSessionGuardType_DeviceCode => Authenticator.GetDeviceCodeAsync( previousCodeWasIncorrect ),
+                        //    _ => throw new NotImplementedException(),
+                        //};
+
+                        //var code = await task.ConfigureAwait( false );
+
+                        //cancellationToken.ThrowIfCancellationRequested();
+
+                        if ( string.IsNullOrEmpty( code ) )
                         {
-                            var task = preferredConfirmation.confirmation_type switch
-                            {
-                                EAuthSessionGuardType.k_EAuthSessionGuardType_EmailCode => Authenticator.GetEmailCodeAsync( preferredConfirmation.associated_message, previousCodeWasIncorrect ),
-                                EAuthSessionGuardType.k_EAuthSessionGuardType_DeviceCode => Authenticator.GetDeviceCodeAsync( previousCodeWasIncorrect ),
-                                _ => throw new NotImplementedException(),
-                            };
-
-                            var code = await task.ConfigureAwait( false );
-
-                            cancellationToken.ThrowIfCancellationRequested();
-
-                            if ( string.IsNullOrEmpty( code ) )
-                            {
-                                throw new InvalidOperationException( "No code was provided by the authenticator." );
-                            }
-
-                            await credentialsAuthSession.SendSteamGuardCodeAsync( code, preferredConfirmation.confirmation_type ).ConfigureAwait( false );
-
-                            waitingForValidCode = false;
+                            throw new InvalidOperationException( "No code was provided by the authenticator." );
                         }
-                        catch ( AuthenticationException e ) when ( e.Result == expectedInvalidCodeResult )
-                        {
-                            previousCodeWasIncorrect = true;
-                        }
+
+                        eResult = await credentialsAuthSession.SendSteamGuardCodeAsync( code, preferredConfirmation.confirmation_type );//.ConfigureAwait( false );
+
+
                     }
-                    while ( waitingForValidCode );
+                    catch
+                    //catch ( AuthenticationException e ) when ( e.Result == expectedInvalidCodeResult )
+                    {
+                        //previousCodeWasIncorrect = true;
+                    }
+                    //}
+                    //while ( waitingForValidCode );
 
                     break;
 
                 // This is a prompt that appears in the Steam mobile app
                 case EAuthSessionGuardType.k_EAuthSessionGuardType_DeviceConfirmation:
                     pollLoop = true;
+                    break;
+
+                case EAuthSessionGuardType.k_EAuthSessionGuardType_MachineToken:
+
                     break;
 
                 /*
@@ -162,7 +171,7 @@ namespace SteamKit2.Authentication
                     break;
 
                 case EAuthSessionGuardType.k_EAuthSessionGuardType_MachineToken:
-                    // ${u.De.LOGIN_BASE_URL}jwt/checkdevice - with steam machine guard cookie set
+                     ${u.De.LOGIN_BASE_URL}jwt/checkdevice - with steam machine guard cookie set
                     throw new NotImplementedException( $"Machine token confirmation is not supported by SteamKit at the moment." );
                 */
 
@@ -170,25 +179,31 @@ namespace SteamKit2.Authentication
                     throw new NotImplementedException( $"Unsupported confirmation type {preferredConfirmation.confirmation_type}." );
             }
 
-            if ( !pollLoop )
-            {
                 cancellationToken.ThrowIfCancellationRequested();
-
-                var pollResponse = await PollAuthSessionStatusAsync().ConfigureAwait( false ) ?? throw new AuthenticationException( "Authentication failed", EResult.Fail );
-                return pollResponse;
-            }
-
-            while ( true )
-            {
-                await Task.Delay( PollingInterval, cancellationToken ).ConfigureAwait( false );
 
                 var pollResponse = await PollAuthSessionStatusAsync().ConfigureAwait( false );
 
-                if ( pollResponse != null )
-                {
-                    return pollResponse;
-                }
-            }
+
+                pollResponse = pollResponse ?? new AuthPollResult( null );
+                //if ( pollResponse == null )
+                //{
+                //    throw new AuthenticationException( "Authentication failed", EResult.Fail );
+                //}
+                pollResponse.EResult = eResult;
+
+                return pollResponse;
+
+            //while ( true )
+            //{
+            //    await Task.Delay( PollingInterval, cancellationToken ).ConfigureAwait( false );
+
+            //    var pollResponse = await PollAuthSessionStatusAsync(  ).ConfigureAwait( false );
+
+            //    if ( pollResponse != null )
+            //    {
+            //        return pollResponse;
+            //    }
+            //}
         }
 
         /// <summary>

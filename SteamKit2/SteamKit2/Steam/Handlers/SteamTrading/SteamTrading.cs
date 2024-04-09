@@ -5,6 +5,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using SteamKit2.Internal;
 
 namespace SteamKit2
@@ -33,7 +35,10 @@ namespace SteamKit2
         /// <param name="user">The client to trade.</param>
         public void Trade( SteamID user )
         {
-            ArgumentNullException.ThrowIfNull( user );
+            if ( user == null )
+            {
+                throw new ArgumentNullException( nameof(user) );
+            }
 
             var tradeReq = new ClientMsgProtobuf<CMsgTrading_InitiateTradeRequest>( EMsg.EconTrading_InitiateTradeRequest );
 
@@ -63,7 +68,10 @@ namespace SteamKit2
         /// <param name="user">The user.</param>
         public void CancelTrade( SteamID user )
         {
-            ArgumentNullException.ThrowIfNull( user );
+            if ( user == null )
+            {
+                throw new ArgumentNullException( nameof(user) );
+            }
 
             var cancelTrade = new ClientMsgProtobuf<CMsgTrading_CancelTradeRequest>( EMsg.EconTrading_CancelTradeRequest );
 
@@ -79,7 +87,10 @@ namespace SteamKit2
         /// <param name="packetMsg">The packet message that contains the data.</param>
         public override void HandleMsg( IPacketMsg packetMsg )
         {
-            ArgumentNullException.ThrowIfNull( packetMsg );
+            if ( packetMsg == null )
+            {
+                throw new ArgumentNullException( nameof(packetMsg) );
+            }
 
             if ( !dispatchMap.TryGetValue( packetMsg.MsgType, out var handlerFunc ) )
             {

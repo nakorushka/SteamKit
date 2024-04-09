@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Net;
+using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -13,18 +14,13 @@ namespace SteamKit2
     {
         internal class WebSocketContext : IDisposable
         {
-            public WebSocketContext(WebSocketConnection connection, EndPoint endPoint, IWebProxy proxy = null)
+            public WebSocketContext(WebSocketConnection connection, EndPoint endPoint)
             {
                 this.connection = connection ?? throw new ArgumentNullException( nameof( connection ) );
                 EndPoint = endPoint ?? throw new ArgumentNullException( nameof( endPoint ) );
 
                 cts = new CancellationTokenSource();
                 socket = new ClientWebSocket();
-                if ( proxy != null )
-                {
-                    socket.Options.Proxy = proxy;
-                }
-
                 connectionUri = ConstructUri(endPoint);
             }
 
@@ -39,10 +35,10 @@ namespace SteamKit2
 
             public void Start(TimeSpan connectionTimeout)
             {
-                runloopTask = RunCore(connectionTimeout, cts.Token).IgnoringCancellation(cts.Token);
+                runloopTask = RunCore(cts.Token, connectionTimeout).IgnoringCancellation(cts.Token);
             }
 
-            async Task RunCore(TimeSpan connectionTimeout, CancellationToken cancellationToken)
+            async Task RunCore(CancellationToken cancellationToken, TimeSpan connectionTimeout)
             {
                 using (var timeout = new CancellationTokenSource())
                 using (var combinedCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token))

@@ -96,7 +96,10 @@ namespace SteamKit2
         /// <exception cref="System.ArgumentException">Username or password are not set within <paramref name="details"/>.</exception>
         public void LogOn( LogOnDetails details )
         {
-            ArgumentNullException.ThrowIfNull( details );
+            if ( details == null )
+            {
+                throw new ArgumentNullException( nameof(details) );
+            }
 
             if ( string.IsNullOrEmpty( details.Token ) )
             {
@@ -122,7 +125,8 @@ namespace SteamKit2
 
             logon.Body.client_os_type = ( uint )Utils.GetOSType();
             logon.Body.game_server_app_id = ( int )details.AppID;
-            logon.Body.machine_id = HardwareUtils.GetMachineID( Client.Configuration.MachineInfoProvider );
+            //logon.Body.machine_id = HardwareUtils.GetMachineID( Client.Configuration.MachineInfoProvider );
+            logon.Body.machine_id = HardwareUtils.GetMachineID( );
 
             logon.Body.game_server_token = details.Token;
 
@@ -156,7 +160,7 @@ namespace SteamKit2
 
             logon.Body.client_os_type = ( uint )Utils.GetOSType();
             logon.Body.game_server_app_id = ( int )appId;
-            logon.Body.machine_id = HardwareUtils.GetMachineID( Client.Configuration.MachineInfoProvider );
+            logon.Body.machine_id = HardwareUtils.GetMachineID();
 
             this.Client.Send( logon );
         }
@@ -180,7 +184,10 @@ namespace SteamKit2
         /// <param name="details">A <see cref="SteamGameServer.StatusDetails"/> object containing the server's status.</param>
         public void SendStatus(StatusDetails details)
         {
-            ArgumentNullException.ThrowIfNull( details );
+            if (details == null)
+            {
+                throw new ArgumentNullException( nameof(details) );
+            }
 
             if (details.Address != null && details.Address.AddressFamily != AddressFamily.InterNetwork)
             {
@@ -209,7 +216,10 @@ namespace SteamKit2
         /// <param name="packetMsg">The packet message that contains the data.</param>
         public override void HandleMsg( IPacketMsg packetMsg )
         {
-            ArgumentNullException.ThrowIfNull( packetMsg );
+            if ( packetMsg == null )
+            {
+                throw new ArgumentNullException( nameof(packetMsg) );
+            }
 
             if ( !dispatchMap.TryGetValue( packetMsg.MsgType, out var handlerFunc ) )
             {

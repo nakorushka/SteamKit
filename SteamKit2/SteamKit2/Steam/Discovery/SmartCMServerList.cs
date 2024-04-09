@@ -52,7 +52,7 @@ namespace SteamKit2.Discovery
         {
             this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
-            servers = [];
+            servers = new Collection<ServerInfo>();
             listLock = new object();
             BadConnectionMemoryTimeSpan = TimeSpan.FromMinutes( 5 );
         }
@@ -156,7 +156,10 @@ namespace SteamKit2.Discovery
         /// <param name="endpointList">The <see cref="ServerRecord"/>s to use for this <see cref="SmartCMServerList"/>.</param>
         public void ReplaceList( IEnumerable<ServerRecord> endpointList )
         {
-            ArgumentNullException.ThrowIfNull( endpointList );
+            if ( endpointList == null )
+            {
+                throw new ArgumentNullException( nameof(endpointList) );
+            }
 
             lock ( listLock )
             {
@@ -230,7 +233,7 @@ namespace SteamKit2.Discovery
             }
         }
 
-        static void MarkServerCore( ServerInfo serverInfo, ServerQuality quality )
+        void MarkServerCore( ServerInfo serverInfo, ServerQuality quality )
         {
             switch ( quality )
             {
@@ -245,12 +248,12 @@ namespace SteamKit2.Discovery
 
                 case ServerQuality.Bad:
                 {
-                    serverInfo.LastBadConnectionTimeUtc = DateTime.UtcNow;
+                        serverInfo.LastBadConnectionTimeUtc = DateTime.UtcNow;
                     break;
                 }
 
                 default:
-                    throw new ArgumentOutOfRangeException( nameof( quality ) );
+                    throw new ArgumentOutOfRangeException( "quality" );
             }
         }
 
@@ -274,7 +277,7 @@ namespace SteamKit2.Discovery
                     where server.Protocol.HasFlagsFast( supportedProtocolTypes )
                     let lastBadConnectionTime = server.LastBadConnectionTimeUtc.GetValueOrDefault()
                     orderby lastBadConnectionTime, index
-                    select new { server.Record.EndPoint, server.Protocol };
+                    select new { EndPoint = server.Record.EndPoint, Protocol = server.Protocol };
                 var result = query.FirstOrDefault();
                 
                 if ( result == null )
@@ -325,7 +328,7 @@ namespace SteamKit2.Discovery
 
             if ( !WaitForServersFetched() )
             {
-                return [];
+                return new ServerRecord[0];
             }
 
             lock ( listLock )

@@ -6,6 +6,8 @@
 
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
@@ -14,6 +16,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Org.Mentalis.Network.ProxySocket.Models;
 using SteamKit2.Discovery;
 
 namespace SteamKit2.Internal
@@ -119,7 +122,7 @@ namespace SteamKit2.Internal
         internal bool ExpectDisconnection { get; set; }
 
         // connection lock around the setup and tear down of the connection task
-        object connectionLock = new();
+        object connectionLock = new object();
         CancellationTokenSource? connectionCancellation;
         Task? connectionSetupTask;
         volatile IConnection? connection;
@@ -137,7 +140,7 @@ namespace SteamKit2.Internal
         {
             Configuration = configuration ?? throw new ArgumentNullException( nameof( configuration ) );
 
-            ArgumentNullException.ThrowIfNull( identifier );
+            if ( identifier is null ) throw new ArgumentNullException( nameof( identifier ) );
             if ( identifier.Length == 0 ) throw new ArgumentException( "Identifer must not be empty.", nameof( identifier ) );
 
             ID = identifier;
@@ -161,10 +164,7 @@ namespace SteamKit2.Internal
         /// The <see cref="IPEndPoint"/> of the CM server to connect to.
         /// If <c>null</c>, SteamKit will randomly select a CM server from its internal list.
         /// </param>
-        /// <param name="proxy">
-        /// The proxy server that will be used to connect to the CM server (only WebSocketConnection is supported).
-        /// </param>
-        public void Connect( ServerRecord? cmServer = null, WebProxy? proxy = null )
+        public void Connect( ServerRecord? cmServer = null, Proxy? proxy = null )
         {
             lock ( connectionLock )
             {
@@ -213,7 +213,7 @@ namespace SteamKit2.Internal
                         return;
                     }
 
-                    var newConnection = CreateConnection( record.ProtocolTypes & Configuration.ProtocolTypes );
+                    var newConnection = CreateConnection( record.ProtocolTypes & Configuration.ProtocolTypes, proxy );
 
                     var connectionRelease = Interlocked.Exchange( ref connection, newConnection );
                     DebugLog.Assert( connectionRelease == null, nameof( CMClient ), "Connection was set during a connect, did you call CMClient.Connect() on multiple threads?" );
@@ -221,16 +221,10 @@ namespace SteamKit2.Internal
                     newConnection.NetMsgReceived += NetMsgReceived;
                     newConnection.Connected += Connected;
                     newConnection.Disconnected += Disconnected;
-
-                    IWebProxy webProxy = proxy ?? Configuration.WebProxy;
-                    if ( ( webProxy != null ) && connection is WebSocketConnection socketConnection )
-                    {
-                        socketConnection.Connect( record.EndPoint, webProxy, ( int )ConnectionTimeout.TotalMilliseconds );
-                    }
-                    else
-                    {
-                        connection.Connect( record.EndPoint, ( int )ConnectionTimeout.TotalMilliseconds );
-                    }
+                    Proxy proxy3;
+                    if (proxy != null) proxy3 = proxy;
+                    else proxy3 = Configuration.Proxy;
+                    newConnection.Connect( record.EndPoint, proxy3, ( int )ConnectionTimeout.TotalMilliseconds );
                 }, TaskContinuationOptions.ExecuteSynchronously ).ContinueWith( t =>
                 {
                     if ( t.IsFaulted )
@@ -418,7 +412,7 @@ namespace SteamKit2.Internal
         {
         }
 
-        IConnection CreateConnection( ProtocolTypes protocol )
+        IConnection CreateConnection( ProtocolTypes protocol, Proxy? proxy = null )
         {
             if ( protocol.HasFlagsFast( ProtocolTypes.WebSocket ) )
             {
@@ -430,7 +424,7 @@ namespace SteamKit2.Internal
             }
             else if ( protocol.HasFlagsFast( ProtocolTypes.Udp ) )
             {
-                return new EnvelopeEncryptedConnection( new UdpConnection( this ), Universe, this, DebugNetworkListener );
+                return new EnvelopeEncryptedConnection( new UdpConnection( this, proxy ), Universe, this, DebugNetworkListener );
             }
 
             throw new ArgumentOutOfRangeException( nameof( protocol ), protocol, "Protocol bitmask has no supported protocols set." );

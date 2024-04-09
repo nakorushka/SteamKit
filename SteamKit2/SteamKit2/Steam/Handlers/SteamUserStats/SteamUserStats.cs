@@ -135,7 +135,10 @@ namespace SteamKit2
         /// <param name="packetMsg">The <see cref="SteamKit2.IPacketMsg"/> instance containing the event data.</param>
         public override void HandleMsg( IPacketMsg packetMsg )
         {
-            ArgumentNullException.ThrowIfNull( packetMsg );
+            if ( packetMsg == null )
+            {
+                throw new ArgumentNullException( nameof(packetMsg) );
+            }
 
             if (! dispatchMap.TryGetValue( packetMsg.MsgType, out var handlerFunc ) )
             {

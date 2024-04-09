@@ -9,7 +9,7 @@ namespace SteamKit2
         class LobbyCache
         {
             readonly ConcurrentDictionary<uint, ConcurrentDictionary<SteamID, Lobby>> lobbies =
-                new();
+                new ConcurrentDictionary<uint, ConcurrentDictionary<SteamID, Lobby>>();
 
             public Lobby? GetLobby( uint appId, SteamID lobbySteamId )
             {

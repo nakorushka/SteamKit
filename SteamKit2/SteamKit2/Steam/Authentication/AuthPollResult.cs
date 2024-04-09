@@ -12,6 +12,7 @@ namespace SteamKit2.Authentication
     /// </summary>
     public sealed class AuthPollResult
     {
+        public EResult EResult { get; set; }
         /// <summary>
         /// Account name of authenticating account.
         /// </summary>
@@ -33,10 +34,13 @@ namespace SteamKit2.Authentication
 
         internal AuthPollResult( CAuthentication_PollAuthSessionStatus_Response response )
         {
+            if ( response != null)
+            {
             AccessToken = response.access_token;
             RefreshToken = response.refresh_token;
             AccountName = response.account_name;
             NewGuardData = response.new_guard_data;
+            }
         }
     }
 }

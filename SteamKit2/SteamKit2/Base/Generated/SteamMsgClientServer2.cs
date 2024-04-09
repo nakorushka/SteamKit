@@ -4786,16 +4786,6 @@ namespace SteamKit2.Internal
         public void Resetclient_remote_id() => __pbn__client_remote_id = null;
         private ulong? __pbn__client_remote_id;
 
-        [global::ProtoBuf.ProtoMember(3)]
-        public bool owned_games_visible
-        {
-            get => __pbn__owned_games_visible.GetValueOrDefault();
-            set => __pbn__owned_games_visible = value;
-        }
-        public bool ShouldSerializeowned_games_visible() => __pbn__owned_games_visible != null;
-        public void Resetowned_games_visible() => __pbn__owned_games_visible = null;
-        private bool? __pbn__owned_games_visible;
-
     }
 
     [global::ProtoBuf.ProtoContract()]

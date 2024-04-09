@@ -109,7 +109,7 @@ namespace SteamKit2
         public ClientMsgProtobuf( IPacketMsg msg )
             : this( msg.GetMsgTypeWithNullCheck( nameof(msg) ) )
         {
-            if ( msg is not PacketClientMsgProtobuf packetMsgProto )
+            if ( !( msg is PacketClientMsgProtobuf packetMsgProto ) )
             {
                 throw new InvalidDataException( "ClientMsgProtobuf used for non-proto message!" );
             }
@@ -184,7 +184,7 @@ namespace SteamKit2
         public ClientMsgProtobuf( IPacketMsg msg )
             : this( msg.GetMsgTypeWithNullCheck( nameof(msg) ) )
         {
-            if ( msg is not PacketClientMsgProtobuf packetMsg )
+            if ( !( msg is PacketClientMsgProtobuf packetMsg ) )
             {
                 throw new InvalidDataException( $"ClientMsgProtobuf<{typeof(TBody).FullName}> used for non-proto message!" );
             }
@@ -325,7 +325,10 @@ namespace SteamKit2
         public ClientMsg( MsgBase<ExtendedClientMsgHdr> msg, int payloadReserve = 64 )
             : this( payloadReserve )
         {
-            ArgumentNullException.ThrowIfNull( msg );
+            if ( msg == null )
+            {
+                throw new ArgumentNullException( nameof(msg) );
+            }
 
             // our target is where the message came from
             Header.TargetJobID = msg.Header.SourceJobID;
@@ -339,9 +342,12 @@ namespace SteamKit2
         public ClientMsg( IPacketMsg msg )
             : this()
         {
-            ArgumentNullException.ThrowIfNull( msg );
+            if ( msg == null )
+            {
+                throw new ArgumentNullException( nameof(msg) );
+            }
 
-            if ( msg is not PacketClientMsg packetMsg )
+            if ( !( msg is PacketClientMsg packetMsg ) )
             {
                 throw new InvalidDataException( $"ClientMsg<{typeof( TBody ).FullName}> used for proto message!" );
             }
@@ -473,7 +479,10 @@ namespace SteamKit2
         public Msg( MsgBase<MsgHdr> msg, int payloadReserve = 0 )
             : this( payloadReserve )
         {
-            ArgumentNullException.ThrowIfNull( msg );
+            if ( msg == null )
+            {
+                throw new ArgumentNullException( nameof(msg) );
+            }
 
             // our target is where the message came from
             Header.TargetJobID = msg.Header.SourceJobID;
@@ -487,9 +496,12 @@ namespace SteamKit2
         public Msg( IPacketMsg msg )
             : this()
         {
-            ArgumentNullException.ThrowIfNull( msg );
+            if ( msg == null )
+            {
+                throw new ArgumentNullException( nameof(msg) );
+            }
 
-            if ( msg is not PacketMsg packetMsg )
+            if ( !( msg is PacketMsg packetMsg ) )
             {
                 throw new InvalidDataException( $"ClientMsg<{typeof( TBody ).FullName}> used for proto message!" );
             }

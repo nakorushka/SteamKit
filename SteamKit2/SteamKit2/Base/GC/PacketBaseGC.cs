@@ -116,7 +116,10 @@ namespace SteamKit2.GC
         /// <param name="data">The data.</param>
         public PacketClientGCMsgProtobuf( uint eMsg, byte[] data )
         {
-            ArgumentNullException.ThrowIfNull( data );
+            if ( data == null )
+            {
+                throw new ArgumentNullException( nameof(data) );
+            }
 
             MsgType = eMsg;
             payload = data;
@@ -190,7 +193,10 @@ namespace SteamKit2.GC
         /// <param name="data">The data.</param>
         public PacketClientGCMsg( uint eMsg, byte[] data )
         {
-            ArgumentNullException.ThrowIfNull( data );
+            if ( data == null )
+            {
+                throw new ArgumentNullException( nameof(data) );
+            }
 
             MsgType = eMsg;
             payload = data;

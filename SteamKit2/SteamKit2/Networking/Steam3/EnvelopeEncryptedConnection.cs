@@ -1,6 +1,6 @@
 ﻿using System;
-using System.IO.Hashing;
 using System.Net;
+using Org.Mentalis.Network.ProxySocket.Models;
 using SteamKit2.Internal;
 
 namespace SteamKit2
@@ -36,8 +36,8 @@ namespace SteamKit2
 
         public event EventHandler<DisconnectedEventArgs>? Disconnected;
 
-        public void Connect( EndPoint endPoint, int timeout = 5000 )
-            => inner.Connect( endPoint, timeout );
+        public void Connect( EndPoint endPoint, Proxy? proxy = null, int timeout = 5000 )
+            => inner.Connect( endPoint, proxy, timeout );
 
         public void Disconnect( bool userInitiated )
         {
@@ -166,7 +166,7 @@ namespace SteamKit2
                 }
             }
 
-            var keyCrc = Crc32.Hash( encryptedHandshakeBlob );
+            var keyCrc = CryptoHelper.CRCHash( encryptedHandshakeBlob );
 
             response.Write( encryptedHandshakeBlob );
             response.Write( keyCrc );

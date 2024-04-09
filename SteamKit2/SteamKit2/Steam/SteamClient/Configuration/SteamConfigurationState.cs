@@ -5,7 +5,7 @@
 
 
 using System;
-using System.Net;
+using Org.Mentalis.Network.ProxySocket.Models;
 using SteamKit2.Discovery;
 
 namespace SteamKit2
@@ -22,7 +22,7 @@ namespace SteamKit2
         public IServerListProvider ServerListProvider;
         public EUniverse Universe;
         public Uri WebAPIBaseAddress;
-        public IWebProxy WebProxy;
         public string WebAPIKey;
+        public Proxy? Proxy;
     }
 }

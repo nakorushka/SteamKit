@@ -48,14 +48,14 @@ namespace SteamKit2.Internal
         private ulong? __pbn__instance_id;
 
         [global::ProtoBuf.ProtoMember(4)]
-        public ulong device_id_OBSOLETE
+        public ulong device_id
         {
-            get => __pbn__device_id_OBSOLETE.GetValueOrDefault();
-            set => __pbn__device_id_OBSOLETE = value;
+            get => __pbn__device_id.GetValueOrDefault();
+            set => __pbn__device_id = value;
         }
-        public bool ShouldSerializedevice_id_OBSOLETE() => __pbn__device_id_OBSOLETE != null;
-        public void Resetdevice_id_OBSOLETE() => __pbn__device_id_OBSOLETE = null;
-        private ulong? __pbn__device_id_OBSOLETE;
+        public bool ShouldSerializedevice_id() => __pbn__device_id != null;
+        public void Resetdevice_id() => __pbn__device_id = null;
+        private ulong? __pbn__device_id;
 
         [global::ProtoBuf.ProtoMember(5)]
         public byte[] device_token
@@ -1033,7 +1033,6 @@ namespace SteamKit2.Internal
         k_EStreamDeviceFormFactorTablet = 2,
         k_EStreamDeviceFormFactorComputer = 3,
         k_EStreamDeviceFormFactorTV = 4,
-        k_EStreamDeviceFormFactorVRHeadset = 5,
     }
 
     [global::ProtoBuf.ProtoContract()]
@@ -1042,7 +1041,7 @@ namespace SteamKit2.Internal
         k_EStreamTransportNone = 0,
         k_EStreamTransportUDP = 1,
         k_EStreamTransportUDPRelay = 2,
-        k_EStreamTransportWebRTC_OBSOLETE = 3,
+        k_EStreamTransportWebRTC = 3,
         k_EStreamTransportSDR = 4,
         k_EStreamTransportUDP_SNS = 5,
         k_EStreamTransportUDPRelay_SNS = 6,
@@ -1055,7 +1054,6 @@ namespace SteamKit2.Internal
         k_EStreamInterfaceRecentGames = 1,
         k_EStreamInterfaceBigPicture = 2,
         k_EStreamInterfaceDesktop = 3,
-        k_EStreamInterfaceSteamVR = 4,
     }
 
     [global::ProtoBuf.ProtoContract()]
@@ -1076,7 +1074,6 @@ namespace SteamKit2.Internal
         k_ERemoteDeviceStreamingTransportUnavailable = 12,
         k_ERemoteDeviceStreamingInvisible = 13,
         k_ERemoteDeviceStreamingGameLaunchFailed = 14,
-        k_ERemoteDeviceStreamingSteamVRNotInstalled = 15,
     }
 
 }

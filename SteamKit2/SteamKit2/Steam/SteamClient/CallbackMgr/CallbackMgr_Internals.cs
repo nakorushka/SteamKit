@@ -79,5 +79,13 @@ namespace SteamKit2.Internal
                 OnRun(cb);
             }
         }
+
+        static Action<TCall, JobID> CreateJoblessAction(Action<TCall> func)
+        {
+            return delegate(TCall callback, JobID jobID)
+            {
+                func(callback);
+            };
+        }
     }
 }

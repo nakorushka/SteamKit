@@ -29,7 +29,7 @@ namespace SteamKit2
         long currentJobId = 0;
         DateTime processStartTime;
 
-        object callbackLock = new();
+        object callbackLock = new object();
         Queue<ICallbackMsg> callbackQueue;
 
         Dictionary<EMsg, Action<IPacketMsg>> dispatchMap;
@@ -82,7 +82,7 @@ namespace SteamKit2
         {
             callbackQueue = new Queue<ICallbackMsg>();
 
-            this.handlers = [];
+            this.handlers = new OrderedDictionary();
 
             // Start calculating machine info so that it is (hopefully) ready by the time we get to logging in.
             HardwareUtils.Init( configuration.MachineInfoProvider );
@@ -131,7 +131,10 @@ namespace SteamKit2
         /// <exception cref="InvalidOperationException">A handler of that type is already registered.</exception>
         public void AddHandler( ClientMsgHandler handler )
         {
-            ArgumentNullException.ThrowIfNull( handler );
+            if ( handler is null )
+            {
+                throw new ArgumentNullException( nameof( handler ) );
+            }
 
             if ( handlers.Contains( handler.GetType() ) )
             {

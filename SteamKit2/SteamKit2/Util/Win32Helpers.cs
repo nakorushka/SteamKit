@@ -6,7 +6,9 @@ using System.Runtime.Versioning;
 
 namespace SteamKit2.Util
 {
+#if NET5_0_OR_GREATER
 	[SupportedOSPlatform("windows")]
+#endif
 	static class Win32Helpers
 	{
 		#region Boot Disk Serial Number
@@ -201,7 +203,7 @@ namespace SteamKit2.Util
 			{
 				public uint NumberOfDiskExtents;
 
-				[MarshalAs( UnmanagedType.ByValArray, SizeConst = 1 )]
+				[MarshalAs( UnmanagedType.ByValArray )]
 				public DISK_EXTENT[] Extents;
 			}
 

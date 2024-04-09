@@ -5,8 +5,8 @@
 
 
 using System;
-using System.Net;
 using System.Net.Http;
+using Org.Mentalis.Network.ProxySocket.Models;
 using SteamKit2.Discovery;
 
 namespace SteamKit2
@@ -40,7 +40,10 @@ namespace SteamKit2
         /// <returns>A configuration object.</returns>
         public static SteamConfiguration Create(Action<ISteamConfigurationBuilder> configurator)
         {
-            ArgumentNullException.ThrowIfNull( configurator );
+            if (configurator == null)
+            {
+                throw new ArgumentNullException(nameof(configurator));
+            }
 
             var builder = new SteamConfigurationBuilder();
             configurator(builder);
@@ -48,7 +51,7 @@ namespace SteamKit2
         }
 
         internal static SteamConfiguration CreateDefault()
-            => new(SteamConfigurationBuilder.CreateDefaultState());
+            => new SteamConfiguration(SteamConfigurationBuilder.CreateDefaultState());
 
         readonly SteamConfigurationState state;
 
@@ -89,6 +92,9 @@ namespace SteamKit2
         /// </summary>
         public ProtocolTypes ProtocolTypes => state.ProtocolTypes;
 
+
+
+        public Proxy? Proxy => state.Proxy;
         /// <summary>
         /// The server list provider to use.
         /// </summary>
@@ -111,11 +117,6 @@ namespace SteamKit2
         /// Keys can be obtained from https://steamcommunity.com/dev or the Steamworks Partner site.
         /// </summary>
         public string WebAPIKey => state.WebAPIKey;
-
-        /// <summary>
-        /// The proxy server used for WebSocket requests.
-        /// </summary>
-        public IWebProxy WebProxy => state.WebProxy;
 
         /// <summary>
         /// The server list used for this configuration.

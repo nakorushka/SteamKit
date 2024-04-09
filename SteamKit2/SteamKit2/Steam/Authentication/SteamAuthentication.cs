@@ -8,6 +8,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using SteamKit2.Internal;
+using SteamKit2.Steam.Authentication;
+using static SteamKit2.SteamUnifiedMessages;
 
 namespace SteamKit2.Authentication
 {
@@ -23,9 +25,12 @@ namespace SteamKit2.Authentication
         /// Initializes a new instance of the <see cref="SteamAuthentication"/> class.
         /// </summary>
         /// <param name="steamClient">The <see cref="SteamClient"/> this instance will be associated with.</param>
-        internal SteamAuthentication( SteamClient steamClient )
+        public SteamAuthentication(SteamClient steamClient)
         {
-            ArgumentNullException.ThrowIfNull( steamClient );
+            if (steamClient == null)
+            {
+                throw new ArgumentNullException(nameof(steamClient));
+            }
 
             Client = steamClient;
 
@@ -37,18 +42,18 @@ namespace SteamKit2.Authentication
         /// Gets public key for the provided account name which can be used to encrypt the account password.
         /// </summary>
         /// <param name="accountName">The account name to get RSA public key for.</param>
-        async Task<CAuthentication_GetPasswordRSAPublicKey_Response> GetPasswordRSAPublicKeyAsync( string accountName )
+        async Task<CAuthentication_GetPasswordRSAPublicKey_Response> GetPasswordRSAPublicKeyAsync(string accountName)
         {
             var request = new CAuthentication_GetPasswordRSAPublicKey_Request
             {
                 account_name = accountName
             };
 
-            var message = await AuthenticationService.SendMessage( api => api.GetPasswordRSAPublicKey( request ) );
+            var message = await AuthenticationService.SendMessage(api => api.GetPasswordRSAPublicKey(request));
 
-            if ( message.Result != EResult.OK )
+            if (message.Result != EResult.OK)
             {
-                throw new AuthenticationException( "Failed to get password public key", message.Result );
+                throw new AuthenticationException("Failed to get password public key", message.Result);
             }
 
             var response = message.GetDeserializedResponse<CAuthentication_GetPasswordRSAPublicKey_Response>();
@@ -62,7 +67,7 @@ namespace SteamKit2.Authentication
         /// <param name="steamID">The SteamID this token belongs to.</param>
         /// <param name="refreshToken">The refresh token.</param>
         /// <param name="allowRenewal">If true, allow renewing the token.</param>
-        public async Task<AccessTokenGenerateResult> GenerateAccessTokenForAppAsync( SteamID steamID, string refreshToken, bool allowRenewal = false )
+        public async Task<AccessTokenGenerateResult> GenerateAccessTokenForAppAsync(SteamID steamID, string refreshToken, bool allowRenewal = false)
         {
             var request = new CAuthentication_AccessToken_GenerateForApp_Request
             {
@@ -70,32 +75,32 @@ namespace SteamKit2.Authentication
                 steamid = steamID.ConvertToUInt64(),
             };
 
-            if ( allowRenewal )
+            if (allowRenewal)
             {
                 request.renewal_type = ETokenRenewalType.k_ETokenRenewalType_Allow;
             }
 
-            var message = await AuthenticationService.SendMessage( api => api.GenerateAccessTokenForApp( request ) );
+            var message = await AuthenticationService.SendMessage(api => api.GenerateAccessTokenForApp(request));
 
-            if ( message.Result != EResult.OK )
+            if (message.Result != EResult.OK)
             {
-                throw new AuthenticationException( "Failed to generate token", message.Result );
+                throw new AuthenticationException("Failed to generate token", message.Result);
             }
 
             var response = message.GetDeserializedResponse<CAuthentication_AccessToken_GenerateForApp_Response>();
 
-            return new AccessTokenGenerateResult( response );
+            return new AccessTokenGenerateResult(response);
         }
 
         /// <summary>
         /// Start the authentication process using QR codes.
         /// </summary>
         /// <param name="details">The details to use for logging on.</param>
-        public async Task<QrAuthSession> BeginAuthSessionViaQRAsync( AuthSessionDetails details )
+        public async Task<QrAuthSession> BeginAuthSessionViaQRAsync(AuthSessionDetails details)
         {
-            if ( !Client.IsConnected )
+            if (!Client.IsConnected)
             {
-                throw new InvalidOperationException( "The SteamClient instance must be connected." );
+                throw new InvalidOperationException("The SteamClient instance must be connected.");
             }
 
             var request = new CAuthentication_BeginAuthSessionViaQR_Request
@@ -105,20 +110,20 @@ namespace SteamKit2.Authentication
                 {
                     device_friendly_name = details.DeviceFriendlyName,
                     platform_type = details.PlatformType,
-                    os_type = ( int )details.ClientOSType,
+                    os_type = (int)details.ClientOSType,
                 }
             };
 
-            var message = await AuthenticationService.SendMessage( api => api.BeginAuthSessionViaQR( request ) );
+            var message = await AuthenticationService.SendMessage(api => api.BeginAuthSessionViaQR(request));
 
-            if ( message.Result != EResult.OK )
+            if (message.Result != EResult.OK)
             {
-                throw new AuthenticationException( "Failed to begin QR auth session", message.Result );
+                throw new AuthenticationException("Failed to begin QR auth session", message.Result);
             }
 
             var response = message.GetDeserializedResponse<CAuthentication_BeginAuthSessionViaQR_Response>();
 
-            var authResponse = new QrAuthSession( this, details.Authenticator, response );
+            var authResponse = new QrAuthSession(this, details.Authenticator, response);
 
             return authResponse;
         }
@@ -129,31 +134,35 @@ namespace SteamKit2.Authentication
         /// <param name="details">The details to use for logging on.</param>
         /// <exception cref="ArgumentNullException">No auth details were provided.</exception>
         /// <exception cref="ArgumentException">Username or password are not set within <paramref name="details"/>.</exception>
-        public async Task<CredentialsAuthSession> BeginAuthSessionViaCredentialsAsync( AuthSessionDetails details )
+        public async Task<ResultAuthSession> BeginAuthSessionViaCredentialsAsync(AuthSessionDetails details)
         {
-            ArgumentNullException.ThrowIfNull( details );
-
-            if ( string.IsNullOrEmpty( details.Username ) || string.IsNullOrEmpty( details.Password ) )
+            ResultAuthSession result = new ResultAuthSession();
+            if (details == null)
             {
-                throw new ArgumentException( "BeginAuthSessionViaCredentials requires a username and password to be set in 'details'." );
+                throw new ArgumentNullException(nameof(details));
             }
 
-            if ( !Client.IsConnected )
+            if (string.IsNullOrEmpty(details.Username) || string.IsNullOrEmpty(details.Password))
             {
-                throw new InvalidOperationException( "The SteamClient instance must be connected." );
+                throw new ArgumentException("BeginAuthSessionViaCredentials requires a username and password to be set in 'details'.");
+            }
+
+            if (!Client.IsConnected)
+            {
+                throw new InvalidOperationException("The SteamClient instance must be connected.");
             }
 
             // Encrypt the password
-            var publicKey = await GetPasswordRSAPublicKeyAsync( details.Username! ).ConfigureAwait( false );
+            var publicKey = await GetPasswordRSAPublicKeyAsync(details.Username!).ConfigureAwait(false);
             var rsaParameters = new RSAParameters
             {
-                Modulus = Utils.DecodeHexString( publicKey.publickey_mod ),
-                Exponent = Utils.DecodeHexString( publicKey.publickey_exp ),
+                Modulus = Utils.DecodeHexString(publicKey.publickey_mod),
+                Exponent = Utils.DecodeHexString(publicKey.publickey_exp),
             };
 
             using var rsa = RSA.Create();
-            rsa.ImportParameters( rsaParameters );
-            var encryptedPassword = rsa.Encrypt( Encoding.UTF8.GetBytes( details.Password ), RSAEncryptionPadding.Pkcs1 );
+            rsa.ImportParameters(rsaParameters);
+            var encryptedPassword = rsa.Encrypt(Encoding.UTF8.GetBytes(details.Password), RSAEncryptionPadding.Pkcs1);
 
             // Create request
             var request = new CAuthentication_BeginAuthSessionViaCredentials_Request
@@ -162,29 +171,35 @@ namespace SteamKit2.Authentication
                 persistence = details.IsPersistentSession ? ESessionPersistence.k_ESessionPersistence_Persistent : ESessionPersistence.k_ESessionPersistence_Ephemeral,
                 website_id = details.WebsiteID,
                 guard_data = details.GuardData,
-                encrypted_password = Convert.ToBase64String( encryptedPassword ),
+                encrypted_password = Convert.ToBase64String(encryptedPassword),
                 encryption_timestamp = publicKey.timestamp,
+                remember_login = true,
+
                 device_details = new CAuthentication_DeviceDetails
                 {
                     device_friendly_name = details.DeviceFriendlyName,
                     platform_type = details.PlatformType,
-                    os_type = ( int )details.ClientOSType,
+                    os_type = (int)details.ClientOSType,
                 }
             };
 
-            var message = await AuthenticationService.SendMessage( api => api.BeginAuthSessionViaCredentials( request ) );
+            ServiceMethodResponse? message = await AuthenticationService.SendMessage(api => api.BeginAuthSessionViaCredentials(request));
 
             // eresult can be InvalidPassword, ServiceUnavailable, InvalidParam, RateLimitExceeded
-            if ( message.Result != EResult.OK )
+            if (message.Result != EResult.OK)
             {
-                throw new AuthenticationException( "Authentication failed", message.Result );
+                result.Result = message.Result;
+                //throw new AuthenticationException( "Authentication failed", message.Result );
+                return result;
             }
 
             var response = message.GetDeserializedResponse<CAuthentication_BeginAuthSessionViaCredentials_Response>();
 
-            var authResponse = new CredentialsAuthSession( this, details.Authenticator, response );
+            var authResponse = new CredentialsAuthSession(this, details.Authenticator, response);
+            result.Result = message.Result;
+            result.CredentialsAuthSession = authResponse;
 
-            return authResponse;
+            return result;
         }
     }
 }

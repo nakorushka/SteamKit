@@ -19,6 +19,10 @@ namespace SteamKit2
 {
     static class Utils
     {
+        public static bool IsMacOS()
+        {
+            return RuntimeInformation.IsOSPlatform( OSPlatform.OSX );
+        }
         public static string EncodeHexString(byte[] input)
         {
             return input.Aggregate(new StringBuilder(),
@@ -26,7 +30,7 @@ namespace SteamKit2
                       ).ToString();
         }
 
-        [return: NotNullIfNotNull( nameof( hex ) )]
+        [return: NotNullIfNotNull("hex")]
         public static byte[]? DecodeHexString(string? hex)
         {
             if (hex == null)
@@ -277,11 +281,15 @@ namespace SteamKit2
                 return true;
             }
 
-            return ch switch
+            switch ( ch )
             {
-                '-' or '.' or '_' => true,
-                _ => false,
-            };
+                case '-':
+                case '.':
+                case '_':
+                    return true;
+            }
+
+            return false;
         }
 
         public static string UrlEncode( string input )
@@ -419,13 +427,13 @@ namespace SteamKit2
                 return false;
             }
 
-            if ( !IPAddress.TryParse( stringValue.AsSpan( 0, colonPosition ), out var address ) )
+            if ( !IPAddress.TryParse( stringValue.Substring( 0, colonPosition ), out var address ) )
             {
                 endPoint = null;
                 return false;
             }
 
-            if ( !ushort.TryParse( stringValue.AsSpan( colonPosition + 1 ), out var port ) )
+            if ( !ushort.TryParse( stringValue.Substring( colonPosition + 1 ), out var port ) )
             {
                 endPoint = null;
                 return false;
@@ -437,12 +445,17 @@ namespace SteamKit2
 
         public static (string host, int port) ExtractEndpointHost( EndPoint endPoint )
         {
-            return endPoint switch
+            switch ( endPoint )
             {
-                IPEndPoint ipep => (ipep.Address.ToString(), ipep.Port),
-                DnsEndPoint dns => (dns.Host, dns.Port),
-                _ => throw new InvalidOperationException( "Unknown endpoint type." ),
-            };
+                case IPEndPoint ipep:
+                    return ( ipep.Address.ToString(), ipep.Port );
+
+                case DnsEndPoint dns:
+                    return ( dns.Host, dns.Port );
+
+                default:
+                    throw new InvalidOperationException( "Unknown endpoint type." );
+            }
         }
     }
 }

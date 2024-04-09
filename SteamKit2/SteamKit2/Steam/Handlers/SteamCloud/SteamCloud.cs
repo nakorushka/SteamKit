@@ -38,7 +38,10 @@ namespace SteamKit2
         /// <returns>The Job ID of the request. This can be used to find the appropriate <see cref="UGCDetailsCallback"/>.</returns>
         public AsyncJob<UGCDetailsCallback> RequestUGCDetails( UGCHandle ugcId )
         {
-            ArgumentNullException.ThrowIfNull( ugcId );
+            if ( ugcId == null )
+            {
+                throw new ArgumentNullException( nameof(ugcId) );
+            }
 
             var request = new ClientMsgProtobuf<CMsgClientUFSGetUGCDetails>( EMsg.ClientUFSGetUGCDetails );
             request.SourceJobID = Client.GetNextJobID();
@@ -98,7 +101,10 @@ namespace SteamKit2
         /// <param name="packetMsg">The packet message that contains the data.</param>
         public override void HandleMsg( IPacketMsg packetMsg )
         {
-            ArgumentNullException.ThrowIfNull( packetMsg );
+            if ( packetMsg == null )
+            {
+                throw new ArgumentNullException( nameof(packetMsg) );
+            }
 
             if ( !dispatchMap.TryGetValue( packetMsg.MsgType, out var handlerFunc ) )
             {

@@ -16,7 +16,10 @@ namespace SteamKit2
         /// <returns>A dynamic <see cref="WebAPI.Interface"/> object to interact with the Web API.</returns>
         public static WebAPI.Interface GetWebAPIInterface(this SteamConfiguration config, string iface)
         {
-            ArgumentNullException.ThrowIfNull( config );
+            if (config == null)
+            {
+                throw new ArgumentNullException(nameof(config));
+            }
 
             return new WebAPI.Interface(config.GetHttpClientForWebAPI(), iface, config.WebAPIKey);
         }
@@ -29,7 +32,10 @@ namespace SteamKit2
         /// <returns>A dynamic <see cref="WebAPI.AsyncInterface"/> object to interact with the Web API.</returns>
         public static WebAPI.AsyncInterface GetAsyncWebAPIInterface(this SteamConfiguration config, string iface)
         {
-            ArgumentNullException.ThrowIfNull( config );
+            if (config == null)
+            {
+                throw new ArgumentNullException(nameof(config));
+            }
 
             return new WebAPI.AsyncInterface(config.GetHttpClientForWebAPI(), iface, config.WebAPIKey);
         }

@@ -1,6 +1,8 @@
-﻿using System;
+﻿using SteamKit2.Internal;
+using System;
 using System.Collections.Generic;
-using SteamKit2.Internal;
+using System.Linq;
+using System.Text;
 
 namespace SteamKit2
 {
@@ -99,7 +101,10 @@ namespace SteamKit2
         /// <returns>The Job ID of the request. This can be used to find the appropriate <see cref="ScreenshotAddedCallback"/>.</returns>
         public AsyncJob<ScreenshotAddedCallback> AddScreenshot( ScreenshotDetails details )
         {
-            ArgumentNullException.ThrowIfNull( details );
+            if ( details == null )
+            {
+                throw new ArgumentNullException( nameof(details) );
+            }
 
             var msg = new ClientMsgProtobuf<CMsgClientUCMAddScreenshot>( EMsg.ClientUCMAddScreenshot );
             msg.SourceJobID = Client.GetNextJobID();
@@ -129,7 +134,10 @@ namespace SteamKit2
         /// <param name="packetMsg">The packet message that contains the data.</param>
         public override void HandleMsg( IPacketMsg packetMsg )
         {
-            ArgumentNullException.ThrowIfNull( packetMsg );
+            if ( packetMsg == null )
+            {
+                throw new ArgumentNullException( nameof(packetMsg) );
+            }
 
             if ( !dispatchMap.TryGetValue( packetMsg.MsgType, out var handlerFunc ) )
             {
