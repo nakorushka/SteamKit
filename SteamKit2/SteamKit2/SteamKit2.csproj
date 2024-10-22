@@ -59,7 +59,7 @@
 
   <ItemGroup>
     <Reference Include="ProxySocket">
-      <HintPath>..\ProxySocket.dll</HintPath>
+      <HintPath>ProxySocket.dll</HintPath>
     </Reference>
   </ItemGroup>
 

@@ -167,6 +167,17 @@ namespace SteamKit2
                 using var timeoutTokenSource = new CancellationTokenSource( timeout );
                 using var connectCancellation = CancellationTokenSource.CreateLinkedTokenSource( cancellationToken.Token, timeoutTokenSource.Token );
 
+                if ( CurrentEndPoint is DnsEndPoint  dnsEP)
+                {
+                    
+                    // Get IP addresses from the host
+                    IPAddress[] addresses = Dns.GetHostAddresses( dnsEP.Host );
+                    if ( addresses.Length > 0 )
+                    {
+                        CurrentEndPoint=  new IPEndPoint( addresses[ 0 ], dnsEP.Port);
+                    }
+                }
+
                 using ( connectCancellation.Token.Register( s => ( ( Socket )s! ).Dispose(), socket ) )
                 {
                     socket.Connect( CurrentEndPoint );

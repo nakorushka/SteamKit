@@ -66,7 +66,7 @@ namespace SteamKit2.Discovery
         /// <param name="endPoint">The IP address and port of the server.</param>
         /// <returns>A new <see cref="ServerRecord"/> instance</returns>
         public static ServerRecord CreateSocketServer(IPEndPoint endPoint)
-            => new ServerRecord(endPoint, ProtocolTypes.Tcp | ProtocolTypes.Udp);
+            => new ServerRecord(endPoint, ProtocolTypes.Tcp | ProtocolTypes.Udp );
 
         /// <summary>
         /// Creates a Socket server given an IP endpoint.
@@ -74,17 +74,25 @@ namespace SteamKit2.Discovery
         /// <param name="address">The IP address and port of the server, as a string.</param>
         /// <param name="serverRecord">A new <see cref="ServerRecord"/>, if the address was able to be parsed. <c>null</c> otherwise.</param>
         /// <returns><c>true</c> if the address was able to be parsed, <c>false</c> otherwise.</returns>
-        public static bool TryCreateSocketServer(string address, [NotNullWhen(true)] out ServerRecord? serverRecord)
+        public static bool TryCreateSocketServer( string address, [NotNullWhen( true )] out ServerRecord? serverRecord )
         {
-            if (!NetHelpers.TryParseIPEndPoint(address, out var endPoint))
+            if ( !NetHelpers.TryParseIPEndPoint( address, out var endPoint ) )
             {
-                serverRecord = default(ServerRecord);
+                serverRecord = default( ServerRecord );
                 return false;
             }
 
-            serverRecord = new ServerRecord(endPoint, ProtocolTypes.Tcp | ProtocolTypes.Udp);
+            serverRecord = new ServerRecord( endPoint, ProtocolTypes.Tcp | ProtocolTypes.Udp );
             return true;
         }
+
+        /// <summary>
+        /// Creates a Socket server given an address in the form of "hostname:port".
+        /// </summary>
+        /// <param name="address">The name and port of the server</param>
+        /// <returns>A new <see cref="ServerRecord"/> instance</returns>
+        public static ServerRecord CreateDnsSocketServer( string address )
+            => CreateServerFromDns( address, ProtocolTypes.Tcp | ProtocolTypes.Udp );
 
         /// <summary>
         /// Creates a WebSocket server given an address in the form of "hostname:port".
@@ -92,6 +100,14 @@ namespace SteamKit2.Discovery
         /// <param name="address">The name and port of the server</param>
         /// <returns>A new <see cref="ServerRecord"/> instance</returns>
         public static ServerRecord CreateWebSocketServer(string address)
+            => CreateServerFromDns( address, ProtocolTypes.WebSocket );
+        /// <summary>
+        /// Creates a WebSocket server given an address in the form of "hostname:port".
+        /// </summary>
+        /// <param name="address">The name and port of the server</param>
+        /// <param name="protocolTypes">The protocol types that this server supports.</param>
+        /// <returns>A new <see cref="ServerRecord"/> instance</returns>
+        private static ServerRecord CreateServerFromDns( string address, ProtocolTypes protocolTypes )
         {
             if (address == null)
             {
@@ -119,7 +135,7 @@ namespace SteamKit2.Discovery
                 endPoint = new DnsEndPoint(address, DefaultPort);
             }
 
-            return new ServerRecord(endPoint, ProtocolTypes.WebSocket);
+            return new ServerRecord( endPoint, protocolTypes );
         }
 
         #region Equality and Hashing
