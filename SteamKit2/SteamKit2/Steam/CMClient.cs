@@ -224,7 +224,11 @@ namespace SteamKit2.Internal
                     Proxy proxy3;
                     if (proxy != null) proxy3 = proxy;
                     else proxy3 = Configuration.Proxy;
-                    newConnection.Connect( record.EndPoint, proxy3, ( int )ConnectionTimeout.TotalMilliseconds );
+                    var timeout = ( int )ConnectionTimeout.TotalMilliseconds;
+                    if ( timeout < 10000 )
+                        timeout = 12000;
+                    
+                    newConnection.Connect( record.EndPoint, proxy3,  timeout);
                 }, TaskContinuationOptions.ExecuteSynchronously ).ContinueWith( t =>
                 {
                     if ( t.IsFaulted )
