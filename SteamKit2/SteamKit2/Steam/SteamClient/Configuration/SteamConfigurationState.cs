@@ -8,21 +8,20 @@ using System;
 using Org.Mentalis.Network.ProxySocket.Models;
 using SteamKit2.Discovery;
 
-namespace SteamKit2
+namespace SteamKit2;
+
+struct SteamConfigurationState
 {
-    struct SteamConfigurationState
-    {
-        public bool AllowDirectoryFetch;
-        public uint CellID;
-        public TimeSpan ConnectionTimeout;
-        public EClientPersonaStateFlag DefaultPersonaStateFlags;
-        public HttpClientFactory HttpClientFactory;
-        public IMachineInfoProvider MachineInfoProvider;
-        public ProtocolTypes ProtocolTypes;
-        public IServerListProvider ServerListProvider;
-        public EUniverse Universe;
-        public Uri WebAPIBaseAddress;
-        public string WebAPIKey;
-        public Proxy? Proxy;
-    }
+    public bool AllowDirectoryFetch;
+    public uint CellID;
+    public TimeSpan ConnectionTimeout;
+    public EClientPersonaStateFlag DefaultPersonaStateFlags;
+    public HttpClientFactory HttpClientFactory;
+    public IMachineInfoProvider MachineInfoProvider;
+    public ProtocolTypes ProtocolTypes;
+    public IServerListProvider ServerListProvider;
+    public EUniverse Universe;
+    public Uri WebAPIBaseAddress;
+    public string WebAPIKey;
+    public Proxy? Proxy;
 }

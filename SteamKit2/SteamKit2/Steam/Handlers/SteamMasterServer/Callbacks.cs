@@ -8,57 +8,56 @@ using System.Linq;
 using System.Net;
 using SteamKit2.Internal;
 
-namespace SteamKit2
+namespace SteamKit2;
+
+public sealed partial class SteamMasterServer
 {
-    public sealed partial class SteamMasterServer
+    /// <summary>
+    /// This callback is received in response to calling <see cref="ServerQuery"/>.
+    /// </summary>
+    public sealed class QueryCallback : CallbackMsg
     {
         /// <summary>
-        /// This callback is received in response to calling <see cref="ServerQuery"/>.
+        /// Represents a single server.
         /// </summary>
-        public sealed class QueryCallback : CallbackMsg
+        public sealed class Server
         {
             /// <summary>
-            /// Represents a single server.
+            /// Gets the IP endpoint of the server.
             /// </summary>
-            public sealed class Server
-            {
-                /// <summary>
-                /// Gets the IP endpoint of the server.
-                /// </summary>
-                public IPEndPoint EndPoint { get; private set; }
-
-                /// <summary>
-                /// Gets the number of Steam authenticated players on this server.
-                /// </summary>
-                public uint AuthedPlayers { get; private set; }
-
-
-                internal Server( CMsgGMSClientServerQueryResponse.Server server )
-                {
-                    EndPoint = new IPEndPoint(
-                        server.server_ip.GetIPAddress(),
-                        ( int )server.query_port );
-
-                    AuthedPlayers = server.auth_players;
-                }
-            }
+            public IPEndPoint EndPoint { get; private set; }
 
             /// <summary>
-            /// Gets the list of servers.
+            /// Gets the number of Steam authenticated players on this server.
             /// </summary>
-            public ReadOnlyCollection<Server> Servers { get; private set; }
+            public uint AuthedPlayers { get; private set; }
 
 
-            internal QueryCallback( JobID jobID, CMsgGMSClientServerQueryResponse msg )
+            internal Server( CMsgGMSClientServerQueryResponse.Server server )
             {
-                JobID = jobID;
+                EndPoint = new IPEndPoint(
+                    server.server_ip.GetIPAddress(),
+                    ( int )server.query_port );
 
-                var serverList = msg.servers
-                    .Select( s => new Server( s ) )
-                    .ToList();
-
-                this.Servers = new ReadOnlyCollection<Server>( serverList );
+                AuthedPlayers = server.auth_players;
             }
+        }
+
+        /// <summary>
+        /// Gets the list of servers.
+        /// </summary>
+        public ReadOnlyCollection<Server> Servers { get; private set; }
+
+
+        internal QueryCallback( JobID jobID, CMsgGMSClientServerQueryResponse msg )
+        {
+            JobID = jobID;
+
+            var serverList = msg.servers
+                .Select( s => new Server( s ) )
+                .ToList();
+
+            this.Servers = new ReadOnlyCollection<Server>( serverList );
         }
     }
 }

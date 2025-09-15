@@ -5,11 +5,10 @@
 
 
 
-namespace SteamKit2
+namespace SteamKit2;
+
+interface INetFilterEncryption
 {
-    interface INetFilterEncryption
-    {
-        byte[] ProcessIncoming( byte[] data );
-        byte[] ProcessOutgoing( byte[] data );
-    }
+    byte[] ProcessIncoming( byte[] data );
+    byte[] ProcessOutgoing( byte[] data );
 }

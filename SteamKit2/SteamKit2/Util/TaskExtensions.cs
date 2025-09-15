@@ -9,19 +9,18 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SteamKit2
+namespace SteamKit2;
+
+static class TaskExtensions
 {
-    static class TaskExtensions
+    public static async Task IgnoringCancellation(this Task task, CancellationToken token)
     {
-        public static async Task IgnoringCancellation(this Task task, CancellationToken token)
+        try
         {
-            try
-            {
-                await task.ConfigureAwait(false);
-            }
-            catch (OperationCanceledException) when (token.IsCancellationRequested)
-            {
-            }
+            await task.ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
         }
     }
 }

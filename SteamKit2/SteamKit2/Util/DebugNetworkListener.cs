@@ -7,124 +7,122 @@
 
 using System;
 using System.IO;
-using System.Reflection;
 using System.Threading;
 
-namespace SteamKit2
+namespace SteamKit2;
+
+/// <summary>
+/// This is a debug utility, do not use it to implement your business logic.
+/// 
+/// This interface is used for logging network messages sent to and received from the Steam server that the client is connected to.
+/// </summary>
+public interface IDebugNetworkListener
 {
     /// <summary>
-    /// This is a debug utility, do not use it to implement your business logic.
-    /// 
-    /// This interface is used for logging network messages sent to and received from the Steam server that the client is connected to.
+    /// Called when a packet is received from the Steam server.
     /// </summary>
-    public interface IDebugNetworkListener
-    {
-        /// <summary>
-        /// Called when a packet is received from the Steam server.
-        /// </summary>
-        /// <param name="msgType">Network message type of this packet message.</param>
-        /// <param name="data">Raw packet data that was received.</param>
-        void OnIncomingNetworkMessage( EMsg msgType, byte[] data );
+    /// <param name="msgType">Network message type of this packet message.</param>
+    /// <param name="data">Raw packet data that was received.</param>
+    void OnIncomingNetworkMessage( EMsg msgType, byte[] data );
 
-        /// <summary>
-        /// Called when a packet is about to be sent to the Steam server.
-        /// </summary>
-        /// <param name="msgType">Network message type of this packet message.</param>
-        /// <param name="data">Raw packet data that will be sent.</param>
-        void OnOutgoingNetworkMessage( EMsg msgType, byte[] data );
+    /// <summary>
+    /// Called when a packet is about to be sent to the Steam server.
+    /// </summary>
+    /// <param name="msgType">Network message type of this packet message.</param>
+    /// <param name="data">Raw packet data that will be sent.</param>
+    void OnOutgoingNetworkMessage( EMsg msgType, byte[] data );
+}
+
+/// <summary>
+/// Dump any network messages sent to and received from the Steam server that the client is connected to.
+/// These messages are dumped to file, and can be analyzed further with NetHookAnalyzer, a hex editor, or your own purpose-built tools.
+///
+/// Be careful with this, sensitive data may be written to the disk (such as your Steam password).
+/// </summary>
+public class NetHookNetworkListener : IDebugNetworkListener
+{
+    const string CategoryName = "NetHook";
+
+    private long MessageNumber;
+    private string LogDirectory;
+    private ILogContext log;
+
+    /// <summary>
+    /// Will create a folder in path "%assembly%/nethook/%currenttime%/"
+    /// </summary>
+    /// <param name="log">An optional logging context for log messages.</param>
+    public NetHookNetworkListener(ILogContext? log = null)
+    {
+        this.log = log ?? DebugLogContext.Instance;
+
+        var directory = AppContext.BaseDirectory;
+
+        LogDirectory = Path.Combine(
+            directory,
+            "nethook",
+            DateUtils.DateTimeToUnixTime( DateTime.Now ).ToString()
+        );
+        Directory.CreateDirectory( LogDirectory );
+
+        this.log.LogDebug( CategoryName, $"Created nethook directory: {LogDirectory}" );
     }
 
     /// <summary>
-    /// Dump any network messages sent to and received from the Steam server that the client is connected to.
-    /// These messages are dumped to file, and can be analyzed further with NetHookAnalyzer, a hex editor, or your own purpose-built tools.
-    ///
-    /// Be careful with this, sensitive data may be written to the disk (such as your Steam password).
+    /// Log to your own folder.
     /// </summary>
-    public class NetHookNetworkListener : IDebugNetworkListener
+    /// <param name="path">Path to folder.</param>
+    /// <param name="log">An optional logging context for log messages.</param>
+    public NetHookNetworkListener( string path, ILogContext? log = null )
     {
-        const string CategoryName = "NetHook";
+        this.log = log ?? DebugLogContext.Instance;
 
-        private long MessageNumber;
-        private string LogDirectory;
-        private ILogContext log;
-
-        /// <summary>
-        /// Will create a folder in path "%assembly%/nethook/%currenttime%/"
-        /// </summary>
-        /// <param name="log">An optional logging context for log messages.</param>
-        public NetHookNetworkListener(ILogContext? log = null)
+        if ( !Directory.Exists( path ) )
         {
-            this.log = log ?? DebugLogContext.Instance;
-
-            var directory = AppContext.BaseDirectory;
-
-            LogDirectory = Path.Combine(
-                directory,
-                "nethook",
-                DateUtils.DateTimeToUnixTime( DateTime.Now ).ToString()
-            );
-            Directory.CreateDirectory( LogDirectory );
-
-            this.log.LogDebug( CategoryName, $"Created nethook directory: {LogDirectory}" );
+            throw new DirectoryNotFoundException( $"{path} does not exist." );
         }
 
-        /// <summary>
-        /// Log to your own folder.
-        /// </summary>
-        /// <param name="path">Path to folder.</param>
-        /// <param name="log">An optional logging context for log messages.</param>
-        public NetHookNetworkListener( string path, ILogContext? log = null )
-        {
-            this.log = log ?? DebugLogContext.Instance;
+        LogDirectory = path;
+    }
 
-            if ( !Directory.Exists( path ) )
-            {
-                throw new DirectoryNotFoundException( $"{path} does not exist." );
-            }
+    /// <summary>
+    /// Called when a packet is received from the Steam server.
+    /// </summary>
+    /// <param name="msgType">Network message type of this packet message.</param>
+    /// <param name="data">Raw packet data that was received.</param>
+    public void OnIncomingNetworkMessage( EMsg msgType, byte[] data )
+    {
+        log.LogDebug( CategoryName, $" <- Recv'd EMsg: {msgType} ({( int )msgType})" );
 
-            LogDirectory = path;
-        }
+        LogNetMessage( "in", msgType, data );
+    }
 
-        /// <summary>
-        /// Called when a packet is received from the Steam server.
-        /// </summary>
-        /// <param name="msgType">Network message type of this packet message.</param>
-        /// <param name="data">Raw packet data that was received.</param>
-        public void OnIncomingNetworkMessage( EMsg msgType, byte[] data )
-        {
-            log.LogDebug( CategoryName, $" <- Recv'd EMsg: {msgType} ({( int )msgType})" );
+    /// <summary>
+    /// Called when a packet is about to be sent to the Steam server.
+    /// </summary>
+    /// <param name="msgType">Network message type of this packet message.</param>
+    /// <param name="data">Raw packet data that will be sent.</param>
+    public void OnOutgoingNetworkMessage( EMsg msgType, byte[] data )
+    {
+        log.LogDebug( CategoryName, $"Sent -> EMsg: {msgType} ({( int )msgType})" );
 
-            LogNetMessage( "in", msgType, data );
-        }
+        LogNetMessage( "out", msgType, data );
+    }
 
-        /// <summary>
-        /// Called when a packet is about to be sent to the Steam server.
-        /// </summary>
-        /// <param name="msgType">Network message type of this packet message.</param>
-        /// <param name="data">Raw packet data that will be sent.</param>
-        public void OnOutgoingNetworkMessage( EMsg msgType, byte[] data )
-        {
-            log.LogDebug( CategoryName, $"Sent -> EMsg: {msgType} ({( int )msgType})" );
+    void LogNetMessage( string direction, EMsg msgType, byte[] data )
+    {
+        var path = Path.Combine( LogDirectory, GetFileName( direction, msgType ) );
 
-            LogNetMessage( "out", msgType, data );
-        }
+        File.WriteAllBytes( path, data );
+    }
 
-        void LogNetMessage( string direction, EMsg msgType, byte[] data )
-        {
-            var path = Path.Combine( LogDirectory, GetFileName( direction, msgType ) );
-
-            File.WriteAllBytes( path, data );
-        }
-
-        string GetFileName( string direction, EMsg msgType )
-        {
-            return string.Format(
-                "{0:D3}_{1}_{2:D}_k_EMsg{3}.bin",
-                Interlocked.Increment( ref MessageNumber ),
-                direction,
-                msgType,
-                msgType
-            );
-        }
+    string GetFileName( string direction, EMsg msgType )
+    {
+        return string.Format(
+            "{0:D3}_{1}_{2:D}_k_EMsg{3}.bin",
+            Interlocked.Increment( ref MessageNumber ),
+            direction,
+            msgType,
+            msgType
+        );
     }
 }

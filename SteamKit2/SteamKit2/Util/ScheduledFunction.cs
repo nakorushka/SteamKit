@@ -8,55 +8,54 @@
 using System;
 using System.Threading;
 
-namespace SteamKit2
+namespace SteamKit2;
+
+class ScheduledFunction
 {
-    class ScheduledFunction
+    public TimeSpan Delay { get; set; }
+
+    Action func;
+
+    bool bStarted;
+    Timer timer;
+
+    public ScheduledFunction( Action func )
+        : this( func, TimeSpan.FromMilliseconds( -1 ) )
     {
-        public TimeSpan Delay { get; set; }
+    }
 
-        Action func;
+    public ScheduledFunction( Action func, TimeSpan delay )
+    {
+        this.func = func;
+        this.Delay = delay;
 
-        bool bStarted;
-        Timer timer;
-
-        public ScheduledFunction( Action func )
-            : this( func, TimeSpan.FromMilliseconds( -1 ) )
-        {
-        }
-
-        public ScheduledFunction( Action func, TimeSpan delay )
-        {
-            this.func = func;
-            this.Delay = delay;
-
-            timer = new Timer( Tick, null, TimeSpan.FromMilliseconds( -1 ), delay );
-        }
-        ~ScheduledFunction()
-        {
-            Stop();
-        }
+        timer = new Timer( Tick, null, TimeSpan.FromMilliseconds( -1 ), delay );
+    }
+    ~ScheduledFunction()
+    {
+        Stop();
+    }
 
 
-        public void Start()
-        {
-            if ( bStarted )
-                return;
+    public void Start()
+    {
+        if ( bStarted )
+            return;
 
-            bStarted = timer.Change( TimeSpan.Zero, Delay );
-        }
+        bStarted = timer.Change( TimeSpan.Zero, Delay );
+    }
 
-        public void Stop()
-        {
-            if ( !bStarted )
-                return;
+    public void Stop()
+    {
+        if ( !bStarted )
+            return;
 
-            bStarted = !timer.Change( TimeSpan.FromMilliseconds( -1 ), Delay );
-        }
+        bStarted = !timer.Change( TimeSpan.FromMilliseconds( -1 ), Delay );
+    }
 
 
-        void Tick( object? state )
-        {
-            func?.Invoke();
-        }
+    void Tick( object? state )
+    {
+        func?.Invoke();
     }
 }

@@ -7,16 +7,14 @@
 
 using System;
 
-namespace SteamKit2
+namespace SteamKit2;
+
+class DisconnectedEventArgs : EventArgs
 {
-    class DisconnectedEventArgs : EventArgs
+    public bool UserInitiated { get; }
+
+    public DisconnectedEventArgs( bool userInitiated )
     {
-        public bool UserInitiated { get; }
-
-        public DisconnectedEventArgs( bool userInitiated )
-        {
-            this.UserInitiated = userInitiated;
-        }
+        this.UserInitiated = userInitiated;
     }
-
 }
